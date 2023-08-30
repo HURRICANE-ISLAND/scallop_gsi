@@ -56,7 +56,8 @@ datlarge <- datlarge %>%
     Date = as.Date(Date),
     # Creating a new variable "type" based on the condition "Gear_Type";
     # if Lantern_Net or Cage, type = Farm | if not, type = Wild
-    type = if_else(Gear_Type %in% c("Lantern_Net", "Cage"), "Farm", "Wild")
+    type = if_else(Gear_Type %in% c("Lantern_Net", "Cage"), "Farm", "Wild"),
+    type = as.factor(type)
   )
 
 # Data cleaning
@@ -134,6 +135,49 @@ suppressWarnings({
 
 # Print the Shapiro-Wilk test results as a table
 print(shapiro_test_table)
+```
+
+## ANOVA
+
+```{r}
+# Define the variables to test
+variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weight", "Shell_Weight", "Shell_Height")
+
+# Define the size class levels of interest
+size_class_levels_of_interest <- c("80-89", "90-99", "100-109")
+
+# Create a data frame to store the ANOVA results
+anova_results_table <- data.frame(
+  Size_Class = character(),
+  Variable = character(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Loop through each size class
+for (size_class_level in size_class_levels_of_interest) {
+  # Subset the data for the current size class
+  subset_data <- dat[dat$sc == size_class_level, ]
+  
+  # Loop through each variable
+  for (var in variables_to_test) {
+    # Perform ANOVA analysis with the current variable as the dependent variable
+    anova_result <- summary(aov(subset_data[[var]] ~ type, data = subset_data))
+    
+    # Extract the p-value from the ANOVA result
+    p_value <- anova_result[[1]]$`Pr(>F)`[1]
+    
+    # Add the results to the data frame
+    anova_results_table <- rbind(anova_results_table, data.frame(
+      Size_Class = as.character(size_class_level),
+      Variable = var,
+      P_Value = p_value
+    ))
+  }
+}
+
+# Print the ANOVA results table
+print(anova_results_table)
 ```
 
 ## Levene's test for variance

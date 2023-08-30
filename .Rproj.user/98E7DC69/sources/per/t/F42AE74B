@@ -12,7 +12,9 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "last_setup_crc32": "a94dcaa32da6d9f8"
+        "last_setup_crc32": "a94dcaa32da6d9f8",
+        "cursorPosition": "132,2",
+        "scrollLine": "109"
     },
     "folds": "",
     "lastKnownWriteTime": 1693239574,

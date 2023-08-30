@@ -1,0 +1,355 @@
+
+library(tidyverse)
+library(ggpubr)
+library(lubridate)
+library(patchwork) # To display 2 charts together
+library(hrbrthemes)
+library(dplyr)
+
+
+
+
+
+sp <- read.csv("~/Downloads/Scallop Dive Data 2019-2021 - EDI_Species (2).csv")
+class <- read.csv("~/Downloads/Scallop Dive Data 2019-2021 - EDI_Class.csv")
+sub <- read.csv("~/Downloads/Scallop Dive Data 2019-2021 - EDI_Substrate (1).csv")
+
+#adjusting classes#
+
+sp$Date <- as.Date(sp$Date)
+sp$Species <- as.factor(sp$Species)
+sp$side<- as.factor(sp$Transect.Side..L.R.)
+sp$Location <- as.factor(sp$Location)
+
+class$side<- as.factor(class$Transect.Side..L.R.)
+class$Date <- as.Date(class$Date)
+class$size.class <- as.factor(class$size.class)
+class$Location <- as.factor(class$Location)
+
+sub$Date <- as.Date(sub$Date)
+sub$side<- as.factor(sub$Transect.Side..L.R.)
+sub$Location <- as.factor(sub$Location)
+sub$Substrate <- as.factor(sub$Substrate)
+
+
+#year-by-year in locations#
+#Crane Island#
+
+#scallop size class count per year and species, not all locations#
+
+CI_class <- class %>% filter(Location == "CraneIsland") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date)) + 
+  geom_bar(position="dodge", stat="identity") + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-16", "2020-07-06", "2021-08-14")), 
+                     labels = c("2019", "2020","2021"))+
+  ylim(c(0,10))+
+  ylab("count")+ 
+  theme_classic() +
+  ggtitle("(A)", "12.Crane Island")
+
+CI_class
+
+Staff_class <- class %>% filter(Location == "HIStaffEnd") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  geom_bar(position="dodge", stat="identity") +
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-09-06", "2020-06-17", "2021-07-15")), 
+                     labels = c("2019", "2020","2021"))+
+  ylim(c(0,10))+
+  ylab("count")+ 
+  theme_classic() +
+  ggtitle("(D)","9. HI Staff End")
+
+Staff_class
+
+HIW_class <- class %>% filter(Location == "HIWest") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  geom_bar(position="dodge", stat="identity") + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-10", "2020-08-11", "2021-08-24")), 
+                     labels = c("2019", "2020","2021"))+
+  theme_classic()+
+  ylab("count")+ ylim(c(0,10))+
+  ggtitle("(B)","6.HI West")
+
+HIW_class
+
+WISW_class <- class %>% filter(Location == "WhiteIslandsSW") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-09-26", "2020-07-06", "2021-09-14")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + ylim(c(0,10))+
+  theme_classic() +
+  ylab("count")+
+  ggtitle("(I)","14.White Islands SW")
+
+WISW_class
+
+HIM_class <- class %>% filter(Location == "HIMooring") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-07-03", "2020-06-17", "2021-09-10")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + ylim(c(0,10))+
+  theme_classic() + ylab("count")+
+  ggtitle("(H)","1.HI Mooring")
+
+HIM_class
+
+WINW_class <- class %>% filter(Location == "WhiteIslandsNW") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-16", "2020-07-06", "2021-09-14")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + 
+  theme_classic() + ylab("count") + ylim(c(0,10))+
+  ggtitle("(F)","13. White Islands NW")
+WINW_class
+
+HIGC_class <- class %>% filter(Location %in% c("HIGastonsCove", "HIGastonCove")) %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  geom_bar(position="dodge", stat="identity") + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-09-13", "2020-07-28", "2021-09-21")), 
+                     labels = c("2019", "2020","2021"))+
+  theme_classic() + 
+  ylim(c(0,10))+
+  ylab("count")+ 
+  ggtitle("(E)","8. HI Gaston's Cove")
+HIGC_class
+view(class)
+HIAQE_class <- class %>% filter(Location == "HIAquacultureE") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-07-30", "2020-06-25", "2021-09-28")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") +
+  theme_classic() + ylab("count")+
+  ggtitle("(C)","3. HI Aquaculture E")
+
+class %>% filter(Location == "HIAquacultureE") %>%
+  ggplot(aes(x = Date, y = scallop.count, fill = size.class)) + geom_bar(stat = "identity",position=position_dodge())
+HIAQE_class
+
+HIAQNE_class <- class %>% filter(Location == "HIAquacultureNE") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date), width = 3) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-01", "2020-08-25", "2021-08-31")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + ylim(c(0,10))+
+  theme_classic() + ylab("count")+
+  ggtitle("(G)","4. HI Aquaculture NE")
+
+AQHINW_class<- class %>% filter(Location == "HIAquacultureNW") %>% 
+  ggplot(aes(fill=size.class, y=scallop.count, x=Date)) + 
+  geom_bar(position="dodge", stat="identity") + ylab("count")+
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-09", "2020-08-24", "2021-09-14")), 
+                     labels = c("2019", "2020","2021"))+
+  theme_classic() + ylim(c(0,10)) +
+  ggtitle("","5.HI Aquaculture NW")
+AQHINW_class
+HIAQNE_class
+
+sp_t <- sp %>% group_by(Year,Date, Location, Species) %>% summarize(count = sum(Total.Species.Count, na.rm = TRUE))
+
+
+CI_sp <- sp_t %>% filter(Location == "CraneIsland") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date)) + 
+  geom_bar(position="dodge", stat="identity") + theme_classic() +
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-16", "2020-07-06", "2021-08-14")), 
+                     labels = c("2019", "2020","2021"))+
+  ggtitle("(A)","12. Crane Island")
+CI_sp
+
+Staff_sp <- sp_t %>% filter(Location == "HIStaffEnd") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date, na.rm = TRUE)) + 
+  geom_bar(position="dodge", stat="identity") + theme_classic() + ylim(c(0,60)) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-09-06", "2020-06-17", "2021-07-15")), 
+                     labels = c("2019", "2020","2021"))+
+  ggtitle("(D)","9. HI Staff End")
+
+
+HIW_sp <- sp_t %>% filter(Location == "HIWest") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date)) + 
+  geom_bar(position="dodge", stat="identity") + ylim(c(0,100))  + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-10", "2020-08-11", "2021-08-24")), 
+                     labels = c("2019", "2020","2021"))+
+  theme_classic() +
+  ggtitle("(B)","6. HI West")
+
+
+WISW_sp<- sp_t %>% filter(Location == "WhiteIslandsSW") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date)) + 
+  geom_bar(position="dodge", stat="identity") +  ylim(c(0,60)) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-09-26", "2020-07-06", "2021-09-14")), 
+                     labels = c("2019", "2020","2021"))+
+  theme_classic() +
+  ggtitle("(F)","14. White Islands SW")
+
+
+HIGC_sp <- sp_t %>% filter(Location %in% c("HIGastonsCove", "HIGastonCove"))%>% 
+  ggplot(aes(fill=Species, y=count, x=Date)) + 
+  geom_bar(position="dodge", stat="identity") + ylim(c(0,60)) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-09-13", "2020-07-28", "2021-09-21")), 
+                     labels = c("2019", "2020","2021"))+
+  theme_classic() + 
+  ggtitle("(E)","8. HI Gaston's Cove")
+  
+HIGC_sp
+
+WINW_sp <- sp_t %>% filter(Location == "WhiteIslandsNW") %>% 
+  ggplot(aes(fill=Species, y= count, x=Date)) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-16", "2020-07-06", "2021-09-14")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + scale_y_continuous(breaks = c(0,25,50,75,100))+
+  theme_classic() +
+  ggtitle("(C)","13. White Islands NW")
+
+WINW_sp
+
+HIAQNE_sp <- sp_t %>% filter(Location == "HIAquacultureNE") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date)) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-08-01", "2020-08-25", "2021-08-31")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + 
+  theme_classic() +
+  ggtitle("(G)","4. HI Aquaculture NE")
+
+HIAQNE_sp
+
+HIAQE_sp <- sp_t %>% filter(Location == "HIAquacultureE") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date)) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-07-30", "2020-06-25", "2021-09-28"), width =4), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") +  
+  theme_classic() +
+  ggtitle("(I)","3. HI Aquaculture E")
+HIAQE_sp
+
+HIM_sp <- sp_t %>% filter(Location == "HIMooring") %>% 
+  ggplot(aes(fill=Species, y=count, x=Date), width = 3) + 
+  scale_x_continuous(name = "Year",
+                     breaks = as.Date(c("2019-07-03", "2020-06-17", "2021-09-10")), 
+                     labels = c("2019", "2020","2021"))+
+  geom_bar(position="dodge", stat="identity") + 
+  theme_classic() +  ylim(c(0,40))+
+  ggtitle("(H)","1. HI Mooring")
+HIM_sp
+class_plot <- ggarrange(CI_class, HIW_class, HIAQE_class, Staff_class, HIGC_class, 
+                        WINW_class,  
+                        HIAQNE_class, HIM_class, WISW_class,
+                        common.legend = TRUE)
+class_plot
+sp_plot <- ggarrange(CI_sp, HIW_sp,  WINW_sp, Staff_sp, HIGC_sp, 
+                     WISW_sp,  
+                     HIAQNE_sp, HIM_sp,HIAQE_sp,
+                     common.legend = TRUE)
+sp_plot
+#magnitfy one or two locations#
+
+p1 <- sp %>% filter(Location == "HIWest") %>% filter(Year == "2021") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Species, y = Total.Species.Count, x = Distance.interval..m.),width =2) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "dodge", stat = "identity") + theme_classic() + 
+  ggtitle("","HI West") + ylab("count") +xlab("distance interval (m)")
+
+ p2 <- sub %>% filter(Location == "HIWest") %>% filter(Year == "2021") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Substrate, y = percent, x = Distance.interval..m.)) +
+  geom_bar(position = "stack", stat = "identity") + 
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  xlab("distance interval (m)") +
+  theme_classic()
+ 
+ ggarrange(p1, p2, ncol= 1, common.legend = FALSE)
+
+b1 <- sp %>% filter(Location == "WhiteIslandsSW") %>% filter(Year == "2021") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Species, y = Total.Species.Count, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "dodge", stat = "identity") + 
+  xlab("distance interval (m)") + ggtitle("","WhiteIslands SW") + 
+  theme_classic() + ylab("count") +xlab("distance interval (m)") +
+  ylim(c(0,6))
+
+b2 <- sub %>% filter(Location == "WhiteIslandsSW") %>% filter(Year == "2021") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Substrate, y = percent, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "stack", stat = "identity") + 
+  xlab("distance interval (m)") +theme_classic()
+
+ggarrange(b1, b2, ncol =1)
+
+c1 <- sp %>% filter(Location == "HIStaffEnd") %>% filter(Year == "2021") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Species, y = Total.Species.Count, x = Distance.interval..m.)) +
+  geom_bar(position = "dodge", stat = "identity") + theme_classic() +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  ggtitle("","HI Staff End")+ ylab("count") +xlab("distance interval (m)")+
+  ylim(c(0,6))
+
+c2 <- sub %>% filter(Location == "HIStaffEnd") %>% filter(Year == "2021") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Substrate, y = percent, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "stack", stat = "identity") + theme_classic()+xlab("distance interval (m)")
+ 
+ggarrange(c1, c2, ncol =1)
+
+d1 <- sp %>% filter(Location == "CraneIsland") %>% filter(Date == "2021-09-14") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Species, y = Total.Species.Count, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "dodge", stat = "identity") + theme_classic()+
+  ggtitle("","Crane Island")+ ylab("count") +xlab("distance interval (m)")+
+  ylim(c(0,6))
+
+d2 <- sub %>% filter(Location == "CraneIsland") %>% filter(Date == "2021-09-14") %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Substrate, y = percent, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "stack", stat = "identity") + theme_classic()
+ggarrange(d1,d2, ncol =1)+xlab("distance interval (m)")
+
+sub %>% filter(Location == "HIValleyCove") %>% filter(Date == as.Date("2020-07-02")) %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Substrate, y = percent, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "stack", stat = "identity") + theme_classic()
+
+sub %>% filter(Location == "HIAquacultureNE") %>% filter(Date == as.Date("")) %>%
+  filter(Transect.Side..L.R. == "R") %>%
+  ggplot(aes(fill = Substrate, y = percent, x = Distance.interval..m.)) +
+  scale_x_continuous(breaks = c(0,25,50,75,100))+
+  geom_bar(position = "stack", stat = "identity") + theme_classic()
+
+ggarrange(d1,d2, ncol =1)+xlab("distance interval (m)")
+
+sub_t <- sub %>% group_by(Year, Date, Location, Substrate, Distance.interval..m.) %>% 
+  summarize(average = mean(percent))
+str(sub_t)
+
+sp_t2 <- sp %>% group_by(Year, Date, Location, Species, Distance.interval..m.) %>% 
+  summarize(percent = sum(Total.Species.Count))
+str(sp_t2)
+view(sp_t2)
+
+sp_t3 <- sp %>% group_by(Year, Date, Location, Species) %>% summarize(x = sum(Total.Species.Count))
+sp_t3
+
+
+ 
+
