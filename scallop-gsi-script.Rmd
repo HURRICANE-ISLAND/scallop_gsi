@@ -137,6 +137,62 @@ suppressWarnings({
 print(shapiro_test_table)
 ```
 
+##Logged normality and statistical tests
+
+```{r}
+# Define the variables to test
+variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weight",
+                       "Shell_Weight", "Shell_Height")
+
+# Create lists to store plots and test results
+density_qq_plots_log <- list()
+shapiro_test_results_log <- list()
+
+# Loop through each variable and create plots and perform Shapiro-Wilk test
+for (var in variables_to_test) {
+  
+  # Density plot
+  density_plot_log <- ggplot(dat, aes(x = log(.data[[var]]))) +
+    geom_density(stat = "density", alpha = 0.2) +
+    xlab(paste("mean(", var, ")")) +
+    ylab("Count")
+  
+  # QQ plot
+  qq_plot_log <- ggqqplot(log(dat[[var]]))
+  
+  # Add density and QQ plots to the list
+  density_qq_plots_log[[var]] <- list(density_plot_log, qq_plot_log)
+  
+  # Shapiro-Wilk test
+  shapiro_test_result_log <- shapiro.test(log(dat[[var]]))
+  shapiro_test_results_log[[var]] <- shapiro_test_result_log
+}
+
+# Create a separate table for Shapiro-Wilk test results
+shapiro_test_table_log <- data.frame(
+  Variable = variables_to_test,
+  P_Value = sapply(shapiro_test_results_log, function(result) result$p.value)
+)
+
+# Suppress warning from ggarrange
+suppressWarnings({
+  # Print the plots using ggarrange
+  library(ggpubr)
+  ggarrange(
+    density_qq_plots$GSI[[1]], density_qq_plots$GSI[[2]],
+    density_qq_plots$Meat_Weight[[1]], density_qq_plots$Meat_Weight[[2]],
+    density_qq_plots$Total_Viscera_Weight[[1]], density_qq_plots$Total_Viscera_Weight[[2]],
+    density_qq_plots$Gonad_Weight[[1]], density_qq_plots$Gonad_Weight[[2]],
+    density_qq_plots$Shell_Weight[[1]], density_qq_plots$Shell_Weight[[2]],
+    density_qq_plots$Shell_Height[[1]], density_qq_plots$Shell_Height[[2]],
+    nrow = 6, ncol = 2
+  )
+})
+
+# Print the Shapiro-Wilk test results as a table
+print(shapiro_test_table)
+```
+
 ## ANOVA
 
 ```{r}
@@ -161,8 +217,8 @@ for (size_class_level in size_class_levels_of_interest) {
   
   # Loop through each variable
   for (var in variables_to_test) {
-    # Perform ANOVA analysis with the current variable as the dependent variable
-    anova_result <- summary(aov(subset_data[[var]] ~ type, data = subset_data))
+    # Perform ANOVA analysis with the current [logged] variable as the dependent variable 
+    anova_result <- summary(aov(log(subset_data[[var]]) ~ type, data = subset_data))
     
     # Extract the p-value from the ANOVA result
     p_value <- anova_result[[1]]$`Pr(>F)`[1]
@@ -180,14 +236,145 @@ for (size_class_level in size_class_levels_of_interest) {
 print(anova_results_table)
 ```
 
-## Levene's test for variance
+#ANOVA again
+```{r}
+# Define the variables to test
+variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weight", "Shell_Weight", "Shell_Height")
+
+# Define the two treatments to run the loop through
+type_levels_of_interest <- c("Farm", "Wild")
+
+# Create a data frame to store the ANOVA results
+anova_results_table <- data.frame(
+  Type = character(),
+  Variable = character(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Loop through each size type
+for (type_level in type_levels_of_interest) {
+  # Subset the data for the current type
+  subset_data <- dat[dat$type == type_level, ]
+  
+  # Loop through each variable
+  for (var in variables_to_test) {
+    # Perform ANOVA analysis with the current [logged] variable as the dependent variable 
+    anova_result <- summary(aov(log(subset_data[[var]]) ~ sc, data = subset_data))
+    
+    # Extract the p-value from the ANOVA result
+    p_value <- anova_result[[1]]$`Pr(>F)`[1]
+    
+    # Add the results to the data frame
+    anova_results_table <- rbind(anova_results_table, data.frame(
+      Type = as.character(type_level),
+      Variable = var,
+      P_Value = p_value
+    ))
+  }
+}
+
+# Print the ANOVA results table
+print(anova_results_table)
+
+#I am unsure if this looks correct# 
+```
+
+#Variance
 
 ```{r}
+#Online source for code/library : https://stat-methods.com/home/levenes-test-for-homogeneity-of-variance/
 
-dat$sc <- as.factor(dat$sc)
+#library for test
 library(car)
-levene_test_results <- summarise_each(group_by(dat, type), funs(leveneTest(.[[var]])))
-print(levene_test_results)
+
+#Define variables to test
+variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weight", "Shell_Weight", "Shell_Height")
+
+#Test variables in two treatment groups: wild and farmed
+
+var_results_table <- data.frame(
+  Variable = character(),
+  F_value = numeric(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+  
+# Loop through each variable
+for (var in variables_to_test) {
+    # Perform Levene test with [logged] variables as the dependent variable 
+    var_result <- leveneTest(log(dat[[var]]) ~ type, data = dat)
+    
+    p_value <- var_result$`Pr(>F)`
+    f_value <- var_result$`F value`
+    
+    var_results_table <- rbind(var_results_table, data.frame(
+      Variable = var,
+      F_value = f_value,
+      P_Value = p_value
+    ))
+    
+   
+    
+  }
+
+print(var_results_table)
+#I do not know why it is printing twice - for AH#
+
+#Variances are not equal
+```
+
+
+#t-test
+```{r}
+# Define the variables to test
+variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weight", "Shell_Weight", "Shell_Height")
+
+# Define the size class levels of interest
+size_class_levels_of_interest <- c("80-89", "90-99", "100-109")
+
+#Dataframe for t.test results
+t_test_results_table <- data.frame(
+  Size_class = character(),
+  Variables = character(),
+  P_value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+
+# Loop through each size class
+for (size_class_level in size_class_levels_of_interest) {
+  # Subset the data for the current size class
+  subset_data <- dat[dat$sc == size_class_level, ]
+  
+  # Loop through each variable
+  for (var in variables_to_test){
+    t_test_result <- t.test(log(subset_data[[var]]) ~ type, data = subset_data, var.equal = FALSE)
+    
+    p_value <- t_test_result$p.value
+    
+    t_test_results_table <- rbind(t_test_results_table, data.frame(
+      Size_class = as.character(size_class_level),
+      Variables = var,
+      P_value = p_value
+    ))
+  }
+  
+}
+
+
+
+# Print the t-test results table
+
+print(t_test_results_table)
+
+#I do not know why it is only running through 1 var and 1 size class#
+
+
+```
+
+
 
 ```
 
