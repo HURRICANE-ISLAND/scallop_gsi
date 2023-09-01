@@ -179,12 +179,12 @@ suppressWarnings({
   # Print the plots using ggarrange
   library(ggpubr)
   ggarrange(
-    density_qq_plots$GSI[[1]], density_qq_plots$GSI[[2]],
-    density_qq_plots$Meat_Weight[[1]], density_qq_plots$Meat_Weight[[2]],
-    density_qq_plots$Total_Viscera_Weight[[1]], density_qq_plots$Total_Viscera_Weight[[2]],
-    density_qq_plots$Gonad_Weight[[1]], density_qq_plots$Gonad_Weight[[2]],
-    density_qq_plots$Shell_Weight[[1]], density_qq_plots$Shell_Weight[[2]],
-    density_qq_plots$Shell_Height[[1]], density_qq_plots$Shell_Height[[2]],
+    density_qq_plots_log$GSI[[1]], density_qq_plots_log$GSI[[2]],
+    density_qq_plots_log$Meat_Weight[[1]], density_qq_plots_log$Meat_Weight[[2]],
+    density_qq_plots_log$Total_Viscera_Weight[[1]], density_qq_plots_log$Total_Viscera_Weight[[2]],
+    density_qq_plots_log$Gonad_Weight[[1]], density_qq_plots_log$Gonad_Weight[[2]],
+    density_qq_plots_log$Shell_Weight[[1]], density_qq_plots_log$Shell_Weight[[2]],
+    density_qq_plots_log$Shell_Height[[1]], density_qq_plots_log$Shell_Height[[2]],
     nrow = 6, ncol = 2
   )
 })
@@ -280,7 +280,7 @@ print(anova_results_table)
 #I am unsure if this looks correct# 
 ```
 
-#Variance
+## Variance
 
 ```{r}
 #Online source for code/library : https://stat-methods.com/home/levenes-test-for-homogeneity-of-variance/
@@ -326,11 +326,21 @@ print(var_results_table)
 ```
 
 
-#t-test
+## T-test
 ```{r}
+dat_test<- dat %>% rename(
+  "Adductor Mass" = "Meat_Weight" ,
+  "Total Viscera Mass" = "Total_Viscera_Weight" ,
+  "Gonad Mass" = "Gonad_Weight", 
+  "Shell Mass" = "Shell_Weight" ,
+  "Shell Height" = "Shell_Height"
+)
+  
+  
 # Define the variables to test
-variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weight", "Shell_Weight", "Shell_Height")
-
+variables_to_test<- c("GSI", "Adductor Mass",
+           "Total Viscera Mass", "Gonad Mass", 
+           "Shell Mass", "Shell Height")
 # Define the size class levels of interest
 size_class_levels_of_interest <- c("80-89", "90-99", "100-109")
 
@@ -346,29 +356,90 @@ t_test_results_table <- data.frame(
 # Loop through each size class
 for (size_class_level in size_class_levels_of_interest) {
   # Subset the data for the current size class
-  subset_data <- dat %>% filter(Week %in% c(32:38), sc == size_class_level)
+  subset_data <- dat_test %>% filter(Week %in% c(32:38), sc == size_class_level)
   
   # Loop through each variable
   for (var in variables_to_test){
     t_test_result <- t.test(log(subset_data[[var]]) ~ type, data = subset_data, var.equal = FALSE)
     
-    p_value <- t_test_result$p.value
+    p.value <- t_test_result$p.value
     
     t_test_results_table <- rbind(t_test_results_table, data.frame(
       Size_class = as.character(size_class_level),
       Variables = var,
-      P_value = p_value
+      p.value = p.value
     ))
   }
   
 }
-
-
+#P.value star significance table for plots
+significance_table <- t_test_results_table %>% add_significance()
 
 # Print the t-test results table
 
 print(t_test_results_table)
 
+#Pring with significance 
+print(significance_table)
+
+
+
+```
+
+##Boxplots
+
+```{r}
+#Box plot of each variable separated farm/wild and size class
+
+#Size class levels defined earlier
+
+#Change variable names for future plotting 
+dat_plot <- dat %>% rename(
+  "Adductor Mass" = "Meat_Weight" ,
+  "Total Viscera Mass" = "Total_Viscera_Weight" ,
+  "Gonad Mass" = "Gonad_Weight", 
+  "Shell Mass" = "Shell_Weight" ,
+  "Shell Height" = "Shell_Height"
+)
+#library for scaling
+library(scales)
+
+#List to store plots
+boxplot_list <- list()
+
+#Selecting variables to plot
+variables_to_plot <- c("GSI", "Adductor Mass", 
+           "Total Viscera Mass", "Gonad Mass", 
+           "Shell Mass", "Shell Height")
+
+  
+  # Loop through each variable
+  for (var in variables_to_plot) {
+    
+    # Subset the data for the current size class
+    subset_data <- dat_plot %>%
+      filter(Week %in% c(32:38) & sc %in% c("80-89", "90-99", "100-109"))
+                                 
+    box_plot <- ggplot(data = subset_data, aes(y = log(.data[[var]]))) + 
+      geom_boxplot(aes(x = type, fill = type)) + 
+      facet_wrap(~sc, ncol = 4) + 
+      scale_fill_grey(name = "", 
+                      start = 0.3,
+                      end = 1.0) +
+      xlab("") + ylab(paste0("ln(", var, ")"))+
+      stat_pvalue_manual(significance_table)+
+      scale_y_continuous(labels = label_number(accuracy = 1))+
+      theme(legend.position="none") 
+    
+    boxplot_list[[var]] <- list(box_plot)
+    
+    
+}
+
+ boxplot_list 
+
+  
+  
 
 
 ```
