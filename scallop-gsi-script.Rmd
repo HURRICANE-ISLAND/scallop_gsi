@@ -386,7 +386,7 @@ print(significance_table)
 
 ```
 
-##Boxplots
+##Figure 1: Boxplots
 
 ```{r}
 #Box plot of each variable separated farm/wild and size class
@@ -439,11 +439,141 @@ variables_to_plot <- c("GSI", "Adductor Mass",
  boxplot_list 
 
   
-  
+suppressWarnings({
+  ggarrange(
+    boxplot_list$`Total Viscera Mass`[[1]],
+    boxplot_list$`Shell Mass`[[1]],
+    boxplot_list$`Adductor Mass`[[1]],
+    boxplot_list$`Gonad Mass`[[1]],
+    boxplot_list$GSI[[1]])
+})
+
+
+```
+## Figure 2: Parsons & Dadswell plots
+
+```{r}
+#Load paper data
+dads <- read_csv("dads_sum.csv") 
+
+#The following code was used to summarize our data and then combined with the Parsons paper
+
+#dat %>% filter(Week %in% 32:38) %>%
+  #group_by(type, sc) %>% 
+  #summarize(mean_gsi = mean(GSI, na.rm = TRUE),
+            #n = length(GSI),
+            #SD = sd(GSI, na.rm = TRUE), 
+            #SE = sd(GSI, na.rm=TRUE) / sqrt(length(GSI)))
+
+#Factoring for order of bar plots
+dads$type <- factor(dads$type, levels = c("Farm", "Wild", "Parson et al"))
+#Single plot
+
+dads %>%
+  ggplot(aes(x = sc, y = mean_gsi, fill = type)) + 
+  geom_bar(stat = "identity", position = "dodge", color= "black") +
+  xlab("Size Category (mm)")+
+  ggtitle("") + ylab("GSI (%)") +
+  geom_errorbar(aes(ymin = mean_gsi - SE, ymax = mean_gsi + SE), 
+                width = 0.2, position = position_dodge(0.9)) +
+  scale_x_discrete(limits = c("60-69", "70-79", "80-89","90-99", "100-109")) +
+  scale_fill_grey(name = "", start = 0.2, end = 0.9) +theme(legend.position="bottom") +
+  geom_text(aes(label = N, y = 0.9), position = position_dodge(0.9), size = 3.5, color = "white")
+
+
 
 
 ```
 
+## Figure 3: Condition Indexes
+```{r}
+
+#Create total mass column = total viscera mass + shell mass
+
+dat_plot <- dat_plot %>% mutate("Total Mass" = `Total Viscera Mass` + `Shell Mass` )
+
+#Select variables to plot
+
+variables_to_plot <- c("GSI", "Adductor Mass", 
+           "Total Viscera Mass", "Gonad Mass", 
+           "Shell Mass")
+
+#Define plot list
+index_plot_list <- list()
+
+#Loop through each variable, not including shell height
+  for (var in variables_to_plot) {
+    
+    # Subset the data for the current size class
+    subset_data <- dat_plot %>%
+      filter(Week %in% c(32:38) & sc %in% c("80-89", "90-99", "100-109"))
+    
+    index_plot <- ggplot(data = subset_data, 
+                         aes(x = ,log(`Total Mass`), y = log(.data[[var]]), color = type))+ geom_point(shape = 1) + 
+      scale_color_manual(values = c("cyan4", "orange")) +
+      geom_smooth(aes(group = type, lty = type), method = "lm", color = "black" ) +
+      stat_regline_equation(aes(label = ..rr.label..)) + ylim(c(1,5))+  xlim(3,6) +  
+      ggtitle("",paste0(var, "(g)")) + ylab(paste0("ln(", var, ")")) + xlab("ln(Total Mass)")
+    
+    index_plot_list[[var]] <- list(index_plot)
+
+    
+}
+
+
+
+suppressWarnings({
+  ggarrange(
+    index_plot_list$`Total Viscera Mass`[[1]],
+    index_plot_list$`Shell Mass`[[1]],
+    index_plot_list$`Adductor Mass`[[1]],
+    index_plot_list$`Gonad Mass`[[1]],
+    index_plot_list$GSI[[1]])
+  })
+
+
+
+```
+
+## Figure 4: Time series of morphometric data
+```{r}
+#Pivot data frame to plot multiple morphometric data
+dat_piv <- dat_plot %>% 
+  pivot_longer(
+    c(13:16, 18), 
+    names_to = "morphometric", 
+    values_to = "value")
+#Plot data 
+dat_piv %>% filter(Week %in% c(20:44)) %>% 
+  ggplot(aes(x = Week, y = `value`, color = morphometric)) + 
+  geom_smooth() + 
+  facet_wrap(~type) + xlim(c(20,50)) +
+  ylab("Mass")+
+  scale_x_continuous(
+    name = "Month", 
+    breaks = c(23,27,32,36, 40), 
+    labels = c("Jun", "Jul", "Aug", "Sep", "Oct")) +
+  scale_color_discrete(name = "Morphometric")
+                       
+
+#Odd that total viscera and shell mass plot so similarly for Farm
+#Checking out indiviual years to see if the trend remains
+dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
+  ggplot(aes(x = Week)) +
+  geom_point(aes(y =`Shell Mass`), color = "blue", alpha = 0.1) +
+  geom_point(aes(y = `Total Viscera Mass`), color = "red", alpha = 0.1) +
+  geom_smooth(aes(y =`Shell Mass`), color = "blue") + 
+  geom_smooth(aes(y = `Total Viscera Mass`), color = "red") +
+  facet_wrap(~Year)+
+  ylab("Mass")+
+  scale_x_continuous(
+    name = "Month", 
+    breaks = c(23,27,32,36, 40), 
+    labels = c("Jun", "Jul", "Aug", "Sep", "Oct"))+
+  
+
+
+```
 
 
 ```
