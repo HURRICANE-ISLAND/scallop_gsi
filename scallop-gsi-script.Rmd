@@ -372,8 +372,10 @@ for (size_class_level in size_class_levels_of_interest) {
   }
   
 }
+#library#
+library(rstatix)
 #P.value star significance table for plots
-significance_table <- t_test_results_table %>% add_significance()
+significance_table <- t_test_results_table %>% add_significance("p.value")
 
 # Print the t-test results table
 
@@ -427,7 +429,6 @@ variables_to_plot <- c("GSI", "Adductor Mass",
                       start = 0.3,
                       end = 1.0) +
       xlab("") + ylab(paste0("ln(", var, ")"))+
-      stat_pvalue_manual(significance_table)+
       scale_y_continuous(labels = label_number(accuracy = 1))+
       theme(legend.position="none") 
     
@@ -569,7 +570,7 @@ dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
   scale_x_continuous(
     name = "Month", 
     breaks = c(23,27,32,36, 40), 
-    labels = c("Jun", "Jul", "Aug", "Sep", "Oct"))+
+    labels = c("Jun", "Jul", "Aug", "Sep", "Oct"))
   
 
 
