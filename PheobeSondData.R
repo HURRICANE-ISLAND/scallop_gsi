@@ -1,11 +1,12 @@
 
 library(dplyr)
 library(readr)
-#make a change for practice
+
 
 
 ##This was Rene helping me get into my data...she is a gem
 ##make the dataframe of data for the given site
+#Index Site Data
 IndexData <- read_csv("CLEAN_eDNA_Index.csv") ## Index DATA
 names(IndexData)
 
@@ -18,13 +19,44 @@ Index <- IndexData |>  #data youre feeding it
 
 Index
 
+#### HI FARM CODE###
+#Load HIFarm Data
+HIFarmData<- read_csv("HIFarm_Sonde.csv")
+names(HIFarmData)
+
+#HIFarm mean data from net depths for each sampling date at HI Farm
+HIFarm <- HIFarmData |>  #data youre feeding it
+  filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
+  group_by(Date) |> #group by date
+  summarise_all(mean) |> #summarize mean each column by date
+  mutate(`Site` = "HI Farm") #add back in site name
+HIFarm
+
+#### HI DISTANT CODE###
+#Load HIDistant Data
+HIDistData<- read_csv("HIDistant_Sonde.csv")
+names(HIDistData)
+
+#HIDist mean data from net depths for each sampling date at HI Farm
+HIDist <- HIDistData |>  #data youre feeding it
+  filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
+  group_by(Date) |> #group by date
+  summarise_all(mean) |> #summarize mean each column by date
+  mutate(`Site` = "HI Farm") #add back in site name
+HIDist
+## Can I remove NA's or actually tell it that there are NAs?
+
+####Combine data mean from each site into one large dataframe#####
+ALL_SITES <- rbind(HIFarm,HIDist)
+
+
+
 ##To find the maximum depth at each site to then determine how to select for just the bottomm two meters
 BenthicDepth <- PheobeData |>  #data youre feeding it
   group_by(Date) |> #group by date
   summarise(max(Depth)) #return max depth of each days visit
 
-##To combine data mean from each site into one large dataframe organized by date and site
-ALL_SITES <- rbind(Index, Othersites1, Othersites2, etc..)
+
 
 
 
