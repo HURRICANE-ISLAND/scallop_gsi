@@ -61,7 +61,7 @@ datlarge <- datlarge %>%
   )
 
 # Data cleaning
-# dat large includes data from 2019-2022 & all gear types
+# datlarge includes data from 2019-2022 & all gear types
 # dat removes (1) 2019 data, (2) cage data, & (3) 1 week of mis-entered data in 2022
 
 # Filtering out above data types
@@ -201,6 +201,7 @@ variables_to_test <- c("GSI", "Meat_Weight", "Total_Viscera_Weight", "Gonad_Weig
 
 # Define the size class levels of interest
 size_class_levels_of_interest <- c("80-89", "90-99", "100-109")
+
 
 # Create a data frame to store the ANOVA results
 anova_results_table <- data.frame(
@@ -575,7 +576,16 @@ dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
 
 
 ```
-
+##Phoebrain Practice##
+ geom_point(aes(y = `Total Viscera Mass`), color = "red", alpha = 0.1) +
+  geom_smooth(aes(y =`Shell Mass`), color = "blue") + 
+  geom_smooth(aes(y = `Total Viscera Mass`), color = "red") +
+  facet_wrap(~Year)+
+  ylab("Mass")+
+  scale_x_continuous(
+    name = "Month", 
+    breaks = c(23,27,32,36, 40), 
+    labels = c("Jun", "Jul", "Aug", "Sep", "Oct"))
 
 ```
 
