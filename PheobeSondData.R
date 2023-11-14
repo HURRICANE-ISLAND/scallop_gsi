@@ -5,26 +5,48 @@ library(readr)
 
 
 ##This was Rene helping me get into my data...she is a gem
-##make the dataframe of data for the given site
+
+###LOAD THE DATA AND MAKE THE DATAFRAME OF DATA FROM EACH SITE### 
+
 #Index Site Data
 IndexData <- read_csv("CLEAN_eDNA_Index.csv") ## Index DATA
 names(IndexData)
 
-####To select out the mean data from net depths for each sampling date at a given site
+#Load HIFarm Data
+HIFarmData<- read_csv("HIFarm_Sonde.csv")
+names(HIFarmData)
+
+#Load HIDistant Data
+HIDistData<- read_csv("HIDistant_Sonde.csv")
+names(HIDistData)
+
+#Load NHFarm Data
+NHFarmData<- read_csv("NHFarm_Sonde.csv")
+names(NHFarmData)
+
+#Load NHDistant Data
+NHDistData<- read_csv("NHDistant_Sonde.csv")
+names(NHDistData)
+
+#Load STFarm Data
+STFarmData<- read_csv("STFarm_Sonde.csv")
+names(STFarmData)
+
+#Load STDistant Data
+STDistData<- read_csv("STDistant_Sonde.csv")
+names(STDistData)
+
+
+
+####SELECT OUT THE MEAN DATA FROM NET DEPTHS AT EACH SITE FOR A GIVEN SAMPLING DATE###
 Index <- IndexData |>  #data youre feeding it
   filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
   group_by(Date) |> #group by date
   summarise_all(mean) |> #summarize mean each column by date
   mutate(`Site` = "Index") #add back in site name
-
 Index
 
-#### HI FARM CODE###
-#Load HIFarm Data
-HIFarmData<- read_csv("HIFarm_Sonde.csv")
-names(HIFarmData)
-
-#HIFarm mean data from net depths for each sampling date at HI Farm
+#HIFarm mean data from net depths 
 HIFarm <- HIFarmData |>  #data youre feeding it
   filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
   group_by(Date) |> #group by date
@@ -32,12 +54,7 @@ HIFarm <- HIFarmData |>  #data youre feeding it
   mutate(`Site` = "HI Farm") #add back in site name
 HIFarm
 
-#### HI DISTANT CODE###
-#Load HIDistant Data
-HIDistData<- read_csv("HIDistant_Sonde.csv")
-names(HIDistData)
-
-#HIDist mean data from net depths for each sampling date at HI Farm
+#HIDist mean data from net depths 
 HIDist <- HIDistData |>  #data youre feeding it
   filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
   group_by(Date) |> #group by date
@@ -46,8 +63,42 @@ HIDist <- HIDistData |>  #data youre feeding it
 HIDist
 ## Can I remove NA's or actually tell it that there are NAs?
 
+#NH Farm mean data from net depths
+NHFarm <- NHFarmData |>  #data youre feeding it
+  filter(Depth >= 5 & Depth <= 7) |> #filter to only have net depths at NH
+  group_by(Date) |> #group by date
+  summarise_all(mean) |> #summarize mean each column by date
+  mutate(`Site` = "HI Farm") #add back in site name
+NHFarm
+
+#NHDist mean data from net depths 
+NHDist <- NHDistData |>  #data youre feeding it
+  filter(Depth >= 5 & Depth <= 7) |> #filter to only have net depths at NHDist
+  group_by(Date) |> #group by date
+  summarise_all(mean) |> #summarize mean each column by date
+  mutate(`Site` = "HI Farm") #add back in site name
+NHDist
+
+#ST Farm mean data from net depths
+STFarm <- STFarmData |>  #data youre feeding it
+  filter(Depth >= 8 & Depth <= 10) |> #filter to only have net depths at NH
+  group_by(Date) |> #group by date
+  summarise_all(mean) |> #summarize mean each column by date
+  mutate(`Site` = "HI Farm") #add back in site name
+STFarm
+
+#STDist mean data from net depths 
+STDist <- STDistData |>  #data youre feeding it
+  filter(Depth >= 8 & Depth <= 10) |> #filter to only have net depths at NHDist
+  group_by(Date) |> #group by date
+  summarise_all(mean) |> #summarize mean each column by date
+  mutate(`Site` = "HI Farm") #add back in site name
+STDist
+
+
+
 ####Combine data mean from each site into one large dataframe#####
-ALL_SITES <- rbind(HIFarm,HIDist)
+ALL_SITES <- rbind(HIFarm,HIDist,NHFarm,NHDist,STFarm,STDist)
 
 
 
