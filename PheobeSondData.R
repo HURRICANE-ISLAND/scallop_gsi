@@ -98,7 +98,11 @@ STDist
 
 
 ####Combine data mean from each site into one large dataframe#####
-ALL_SITES <- rbind(HIFarm,HIDist,NHFarm,NHDist,STFarm,STDist)
+#ALL_SITES <- rbind(HIFarm,HIDist,NHFarm,NHDist,STFarm,STDist)
+
+ALL_SITES <- rbind(HIFarm,HIDist,STDist)
+
+
 
 
 
