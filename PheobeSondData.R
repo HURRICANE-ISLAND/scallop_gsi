@@ -64,7 +64,7 @@ HIDist <- HIDistData |>  #data youre feeding it
   filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #AMH change to calculate means without NAs
-  mutate(`Site` = "HI Farm") #add back in site name
+  mutate(`Site` = "HI Distant") #add back in site name
 HIDist
 ## Can I remove NA's or actually tell it that there are NAs? AMH - Yes, I wrote a function above to remove NAs when calculating the mean. If 
 ## they are missing, they will now appear as NaN
@@ -74,7 +74,7 @@ NHFarm <- NHFarmData |>  #data youre feeding it
   filter(Depth >= 5 & Depth <= 7) |> #filter to only have net depths at NH
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #AMH change to calculate means without NAs
-  mutate(`Site` = "HI Farm") #add back in site name
+  mutate(`Site` = "NH Farm") #add back in site name
 NHFarm
 
 #NHDist mean data from net depths 
@@ -82,7 +82,7 @@ NHDist <- NHDistData |>  #data youre feeding it
   filter(Depth >= 5 & Depth <= 7) |> #filter to only have net depths at NHDist
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #AMH change to calculate means without NAs
-  mutate(`Site` = "HI Farm") #add back in site name
+  mutate(`Site` = "NH Distant") #add back in site name
 NHDist
 
 #ST Farm mean data from net depths
@@ -90,7 +90,7 @@ STFarm <- STFarmData |>  #data youre feeding it
   filter(Depth >= 8 & Depth <= 10) |> #filter to only have net depths at NH
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #AMH change to calculate means without NAs
-  mutate(`Site` = "HI Farm") #add back in site name
+  mutate(`Site` = "ST Farm") #add back in site name
 STFarm
 
 #STDist mean data from net depths 
@@ -98,18 +98,24 @@ STDist <- STDistData |>  #data youre feeding it
   filter(Depth >= 8 & Depth <= 10) |> #filter to only have net depths at NHDist
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #AMH change to calculate means without NAs
-  mutate(`Site` = "HI Farm") #add back in site name
+  mutate(`Site` = "ST Distant") #add back in site name
 STDist
 
 # Combine the dataframes into one large dataframe
 combined_data <- bind_rows(HIFarm, HIDist, NHFarm, NHDist, STFarm, STDist)
+combined_data #Full list of all means of variables measured at each site at each dates
 
 # Print the first few rows of the combined dataframe
 head(combined_data)
 
-#End AMH comments
+###EXPORT new dataframe with means to excel###
+install.packages("writexl")
+library(writexl)
+write_xlsx(combined_data, "/Users/phoebejekielek/Documents/GitHub/scallop_gsi/combined_data.xlsx")
 
-##To find the maximum depth at each site to then determine how to select for just the bottomm two meters
+
+
+##To find the maximum depth at each site to then determine how to select for just the bottom two meters
 BenthicDepth <- PheobeData |>  #data youre feeding it
   group_by(Date) |> #group by date
   summarise(max(Depth)) #return max depth of each days visit
