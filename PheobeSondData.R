@@ -104,6 +104,7 @@ STDist
 # Combine the dataframes into one large dataframe
 combined_data <- bind_rows(HIFarm, HIDist, NHFarm, NHDist, STFarm, STDist)
 combined_data #Full list of all means of variables measured at each site at each dates
+write.csv(combined_data,file = "Sonde_env_Means.csv")
 
 # Print the first few rows of the combined dataframe
 head(combined_data)
