@@ -15,6 +15,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 
 # Load necessary libraries
+install.packages("rlang")
+library(ggplot2)
 library(tidyverse)
 library(ggpubr)
 library(patchwork) 
@@ -156,7 +158,7 @@ for (var in variables_to_test) {
     geom_density(stat = "density", alpha = 0.2) +
     xlab(paste("mean(", var, ")")) +
     ylab("Count")
-  
+
   # QQ plot
   qq_plot_log <- ggqqplot(log(dat[[var]]))
   
@@ -278,7 +280,7 @@ for (type_level in type_levels_of_interest) {
 # Print the ANOVA results table
 print(anova_results_table)
 
-#I am unsure if this looks correct# 
+#I am unsure if this looks correct# - for AH
 ```
 
 ## Variance
@@ -322,8 +324,8 @@ for (var in variables_to_test) {
 
 print(var_results_table)
 #I do not know why it is printing twice - for AH#
+#Variances are not equal...so why are we using ANOVA??? - fo AH#
 
-#Variances are not equal
 ```
 
 
@@ -385,7 +387,7 @@ print(t_test_results_table)
 #Pring with significance 
 print(significance_table)
 
-
+#Can we talk about these tables and which test of significance we ended up using? My understanding is that there's no normality or equality of variance, so what test tells us significance? - for AH
 
 ```
 
@@ -450,7 +452,7 @@ suppressWarnings({
     boxplot_list$GSI[[1]])
 })
 
-
+#Where in the code is it specified to compare wild and cultured populations?? -for AH
 ```
 ## Figure 2: Parsons & Dadswell plots
 
@@ -484,7 +486,7 @@ dads %>%
 
 
 
-
+#How do we add in the the wild data from the smaller size classes?? I also don't see where we told it not to include these. - for AH
 ```
 
 ## Figure 3: Condition Indexes
@@ -522,7 +524,7 @@ index_plot_list <- list()
     
 }
 
-
+##SO, these figures are only data from those size classes, not all size classes?
 
 suppressWarnings({
   ggarrange(
@@ -559,6 +561,7 @@ dat_piv %>% filter(Week %in% c(20:44)) %>%
                        
 
 #Odd that total viscera and shell mass plot so similarly for Farm
+
 #Checking out indiviual years to see if the trend remains
 dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
   ggplot(aes(x = Week)) +
@@ -576,6 +579,8 @@ dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
 
 
 ```
+
+```{r}
 ##Phoebrain Practice##
  geom_point(aes(y = `Total Viscera Mass`), color = "red", alpha = 0.1) +
   geom_smooth(aes(y =`Shell Mass`), color = "blue") + 
@@ -586,6 +591,7 @@ dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
     name = "Month", 
     breaks = c(23,27,32,36, 40), 
     labels = c("Jun", "Jul", "Aug", "Sep", "Oct"))
-
 ```
+
+
 
