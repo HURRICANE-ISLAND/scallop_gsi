@@ -570,13 +570,12 @@ dat_plot %>% filter(Week %in% c(20:44)) %>% filter(type == "Farm") %>%
   geom_smooth(aes(y =`Shell Mass`), color = "blue") + 
   geom_smooth(aes(y = `Total Viscera Mass`), color = "red") +
   facet_wrap(~Year)+
-  ylab("Mass")+
+  ylab("Mass (g)")+
   scale_x_continuous(
     name = "Month", 
     breaks = c(23,27,32,36, 40), 
     labels = c("Jun", "Jul", "Aug", "Sep", "Oct"))
   
-
 
 ```
 
