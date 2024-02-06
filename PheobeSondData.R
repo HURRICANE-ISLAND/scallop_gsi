@@ -8,7 +8,7 @@ library(readr)
 
 ###LOAD THE DATA AND MAKE THE DATAFRAME OF DATA FROM EACH SITE### 
 
-#Index Site Data
+#Load Index Site Data
 IndexData <- read_csv("CLEAN_eDNA_Index.csv") ## Index DATA
 names(IndexData)
 
@@ -100,7 +100,7 @@ STDist <- STDistData |>  #data youre feeding it
   mutate(`Site` = "ST Distant") #add back in site name
 STDist
 
-# Combine the dataframes into one large dataframe
+# Combine the dataframes into one large dataframe of net-level means
 combined_mean_data <- bind_rows(HIFarm, HIDist, NHFarm, NHDist, STFarm, STDist)
 combined_mean_data #Full list of all means of variables measured at each site at each date
 write.csv(combined_data,file = "Sonde_env_Means.csv")
@@ -108,10 +108,28 @@ write.csv(combined_data,file = "Sonde_env_Means.csv")
 # Print the first few rows of the combined dataframe
 head(combined_mean_data)
 
-###EXPORT new dataframe with means to excel###
+###EXPORT new dataframe with net-level means to excel###
 install.packages("writexl")
 library(writexl)
 write_xlsx(combined_mean_data, "/Users/phoebejekielek/Documents/GitHub/scallop_gsi/combined_data.xlsx")
+
+####SELECT OUT THE BOTTOM TWO METERS OF DATA AT EACH SITE FOR A GIVEN SAMPLING DATE####
+library(readr)
+HIFarmData
+# Determine the number of rows corresponding to the bottom 2 meters...#AMH - PERHAPS I NEED TO DO SOMETHING BY DATE HERE??
+# Assuming your data has a column named "depth" representing the depth measurements
+HIFbottom_2m_rows <- sum(HIFarmData$Depth >= (max(HIFarmData$Depth) - 2))
+HIFbottom_2m_rows
+# Subset the data to select the bottom 2 meters
+HIFbottom_2m_data <- HIFarmData[(nrow(HIFarmData) - bottom_2m_rows + 1):nrow(HIFarmData), ]
+HIFbottom_2m_data
+
+####CALCULATE MEAN OF BOTTOM 2M FOR EACH SITE FOR EACH SAMPLING DATE#### - AMH SEE HERE TOO PLEASE
+HIFarmBot <- HIFbottom_2m_data |>  #data youre feeding it
+  group_by(Date) |> #group by date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
+  mutate(`Site` = "HI Farm") #add back in site name
+HIFarmBot
 
 ##Plot variable mean values by site
 ggplot(combined_mean_data, aes(x=Date, y = Temp °C))+
