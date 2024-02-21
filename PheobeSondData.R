@@ -2,10 +2,6 @@
 library(dplyr)
 library(readr)
 
-
-
-##This was Rene helping me get into my data...she is a gem
-
 ###LOAD THE DATA AND MAKE THE DATAFRAME OF DATA FROM EACH SITE### 
 
 #Load Index Site Data
@@ -14,29 +10,80 @@ names(IndexData)
 
 #Load HIFarm Data
 HIFarmData<- read_csv("HIFarm_Sonde.csv")
-names(HIFarmData)
+HIFarm<- HIFarmData %>% #use package dplyr to rename
+  rename("Salinity"="Sal psu") %>% #rename some columns
+  rename("Chl5"="Chlorophyll RFU...5")%>%
+  rename("Chl6"="Chlorophyll RFU...6")%>% 
+  select(-"Wiper Position volt",-"Barometer mmHg",-"GPS Longitude °",-"GPS Latitude °",
+         -"Cable Pwr V",-"Battery V",-"Altitude m",-"pH mV",-"Time",-"Vertical Position m")#+#adding code to remove some columns of data
+  #mutate(`Site` = "HI Farm") #add back in site name
+  
+names(HIFarm)
 
 #Load HIDistant Data
 HIDistData<- read_csv("HIDistant_Sonde.csv")
-names(HIDistData)
+HIDist<- HIDistData %>% #use package dplyr to rename
+  rename("Salinity"="Sal psu") %>%
+  rename("Chl5"="Chlorophyll RFU...5")%>%
+  rename("Chl6"="Chlorophyll RFU...6")%>% 
+  select(-"Wiper Position volt",-"Barometer mmHg",-"GPS Longitude °",-"GPS Latitude °",
+         -"Cable Pwr V",-"Battery V",-"Altitude m",-"pH mV",-"Time",-"Vertical Position m")#adding code to remove some columns of data
+names(HIDist)
 
 #Load NHFarm Data
 NHFarmData<- read_csv("NHFarm_Sonde.csv")
-names(NHFarmData)
+NHFarm<- NHFarmData %>% #use package dplyr to rename
+  rename("Salinity"="Sal psu") %>%
+  rename("Chl5"="Chlorophyll RFU...5")%>%
+  rename("Chl6"="Chlorophyll RFU...6")%>% 
+  select(-"Wiper Position volt",-"Barometer mmHg",-"GPS Longitude °",-"GPS Latitude °",
+         -"Cable Pwr V",-"Battery V",-"pH mV",-"Altitude m",-"Time (HH:mm:ss)",-"Vertical Position m")#adding code to remove some columns of data
+names(NHFarm)
+
 
 #Load NHDistant Data
 NHDistData<- read_csv("NHDistant_Sonde.csv")
-names(NHDistData)
+NHDist<- NHDistData %>% #use package dplyr to rename
+  rename("Salinity"="Sal psu") %>%
+  rename("Chl5"="Chlorophyll RFU...5")%>%
+  rename("Chl6"="Chlorophyll RFU...6")%>% 
+  select(-"Wiper Position volt",-"Barometer mmHg",-"GPS Longitude °",-"GPS Latitude °",
+         -"Cable Pwr V",-"Battery V",-"pH mV",-"Altitude m",-"Time (HH:mm:ss)",-"Vertical Position m")#adding code to remove some columns of data
+names(NHDist)
 
 #Load STFarm Data
 STFarmData<- read_csv("STFarm_Sonde.csv")
-names(STFarmData)
+STFarm<- STFarmData %>% #use package dplyr to rename
+  rename("Salinity"="Sal psu") %>%
+  rename("Chl5"="Chlorophyll RFU...5")%>%
+  rename("Chl6"="Chlorophyll RFU...6")%>% 
+  select(-"Wiper Position volt",-"Barometer mmHg",-"GPS Longitude °",-"GPS Latitude °",
+         -"Cable Pwr V",-"Battery V",-"pH mV",-"Altitude m",-"Time (HH:mm:ss)",-"Vertical Position m")#adding code to remove some columns of data
+names(STFarm)
 
 #Load STDistant Data
 STDistData<- read_csv("STDistant_Sonde.csv")
-names(STDistData)
+STDist<- STDistData %>% #use package dplyr to rename
+  rename("Salinity"="Sal psu") %>% 
+  rename("Chl5"="Chlorophyll RFU...5")%>%
+  rename("Chl6"="Chlorophyll RFU...6")%>% 
+  select(-"Wiper Position volt",-"Barometer mmHg",-"GPS Longitude °",-"GPS Latitude °",
+         -"Cable Pwr V",-"Battery V",-"pH mV",-"Altitude m",-"Time (HH:mm:ss)",-"Vertical Position m")#adding code to remove some columns of data
+names(STDist)
 
+#Dataframe of all data from all sites
+AllAQData <- bind_rows(HIFarm, HIDist, NHFarm, NHDist, STFarm, STDist)
+AllAQData 
 
+# Dot plot with colors
+All<-ggplot(data=AllAQData, aes(x = Site, y = Salinity, color = Site)) +
+  geom_point(alpha=0.2) +
+  theme_classic()+
+  stat_summary(aes(x=Site,y=Salinity),fun=mean,geom = "point",color="red",size=4)+
+  labs(x = "Time", y = "Mean Salinity at Depth", title = "Mean Salinity at Sites") +
+  scale_color_discrete(name = "Site")+# Customize legend title
+  ylim(28,35)
+All
 
 ####SELECT OUT THE MEAN DATA FROM NET DEPTHS AT EACH SITE FOR A GIVEN SAMPLING DATE###
 
@@ -52,137 +99,219 @@ Index <- IndexData |>  #data youre feeding it
 Index
 
 #HIFarm mean data from net depths 
-HIFarm <- HIFarmData |>  #data youre feeding it
+HIFarmNet <- HIFarm |>  #data youre feeding it
   filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #AMH change to calculate means without NAs
   mutate(`Site` = "HI Farm") #add back in site name
-HIFarm
+HIFarmNet
 
 #HIDist mean data from net depths 
-HIDist <- HIDistData |>  #data youre feeding it
+HIDistNet <- HIDist |>  #data youre feeding it
   filter(Depth >= 4 & Depth <= 6) |> #filter to only have certain depths
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
   mutate(`Site` = "HI Distant") #add back in site name
-HIDist
+HIDistNet
 
 
 #NH Farm mean data from net depths
-NHFarm <- NHFarmData |>  #data youre feeding it
+NHFarmNet <- NHFarm |>  #data youre feeding it
   filter(Depth >= 5 & Depth <= 7) |> #filter to only have net depths at NH
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
   mutate(`Site` = "NH Farm") #add back in site name
-NHFarm
+NHFarmNet
 
 #NHDist mean data from net depths 
-NHDist <- NHDistData |>  #data youre feeding it
+NHDistNet <- NHDist |>  #data youre feeding it
   filter(Depth >= 5 & Depth <= 7) |> #filter to only have net depths at NHDist
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
   mutate(`Site` = "NH Distant") #add back in site name
-NHDist
+NHDistNet
 
 #ST Farm mean data from net depths
-STFarm <- STFarmData |>  #data youre feeding it
+STFarmNet <- STFarm |>  #data youre feeding it
   filter(Depth >= 8 & Depth <= 10) |> #filter to only have net depths at NH
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
   mutate(`Site` = "ST Farm") #add back in site name
-STFarm
+STFarmNet
 
 #STDist mean data from net depths 
-STDist <- STDistData |>  #data youre feeding it
+STDistNet <- STDist |>  #data youre feeding it
   filter(Depth >= 8 & Depth <= 10) |> #filter to only have net depths at NHDist
   group_by(Date) |> #group by date
   summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
   mutate(`Site` = "ST Distant") #add back in site name
-STDist
+STDistNet
 
 # Combine the dataframes into one large dataframe of net-level means
-combined_mean_data <- bind_rows(HIFarm, HIDist, NHFarm, NHDist, STFarm, STDist)
-combined_mean_data #Full list of all means of variables measured at each site at each date
-write.csv(combined_data,file = "Sonde_env_Means.csv")
+NetLevelMeans <- bind_rows(HIFarmNet, HIDistNet, NHFarmNet, NHDistNet, STFarmNet, STDistNet)
+NetLevelMeans #Full list of all means of variables measured at each site at each date
 
 # Print the first few rows of the combined dataframe
-head(combined_mean_data)
+head(NetLevelMeans)
 
 ###EXPORT new dataframe with net-level means to excel###
 install.packages("writexl")
 library(writexl)
-write_xlsx(combined_mean_data, "/Users/phoebejekielek/Documents/GitHub/scallop_gsi/combined_data.xlsx")
+write_xlsx(NetLevelMeans, "/Users/phoebejekielek/Documents/GitHub/scallop_gsi/Sonde_Net_Means.csv")
+
+###MAKE SOME FIGURES WITH NET-LEVEL DATA###
+boxplot(Depth~Site,data=NetLevelMeans,
+        main = "Average Depth at Each Site", 
+        xlab = "Site", 
+        ylab = "Average Depth (m)",
+        col = c("lightblue", "lightgreen", "lightyellow"), # Set colors for the boxes
+        border = "black",  # Set color for the border lines
+        notch = FALSE#,      # Add notches to the boxplot
+        #notchwidth = 0.5# Set width of the notches
+)
+
+boxplot(pH~Site,data=NetLevelMeans,
+        main = "Average pH at Each Site", 
+        xlab = "Site", 
+        ylab = "Average pH",
+        #col = c("lightblue", "lightgreen", "lightyellow"), # Set colors for the boxes
+        border = "black",  # Set color for the border lines
+        notch = FALSE#,      # Add notches to the boxplot
+        #notchwidth = 0.5# Set width of the notches
+)
+
+
+boxplot(ODO mg/L~Site,data=combined_mean_data,
+        main = "Average Dissolved Oxygen at Each Site", 
+        xlab = "Site", 
+        ylab = "Average pH",
+        #col = c("lightblue", "lightgreen", "lightyellow"), # Set colors for the boxes
+        border = "black",  # Set color for the border lines
+        notch = FALSE#,      # Add notches to the boxplot
+        #notchwidth = 0.5# Set width of the notches
+)
+
+
+
+
+
+
+
+
+
 
 ####SELECT OUT THE BOTTOM TWO METERS OF DATA AT EACH SITE FOR A GIVEN SAMPLING DATE####
 library(readr)
-HIFarmData
-# Determine the number of rows corresponding to the bottom 2 meters...#AMH - PERHAPS I NEED TO DO SOMETHING BY DATE HERE??
-# Assuming your data has a column named "depth" representing the depth measurements
-HIFbottom_2m_rows <- sum(HIFarmData$Depth >= (max(HIFarmData$Depth) - 2))
-HIFbottom_2m_rows
-# Subset the data to select the bottom 2 meters
-HIFbottom_2m_data <- HIFarmData[(nrow(HIFarmData) - bottom_2m_rows + 1):nrow(HIFarmData), ]
-HIFbottom_2m_data
+library(dplyr)
 
-####CALCULATE MEAN OF BOTTOM 2M FOR EACH SITE FOR EACH SAMPLING DATE#### - AMH SEE HERE TOO PLEASE
-HIFarmBot <- HIFbottom_2m_data |>  #data youre feeding it
-  group_by(Date) |> #group by date
-  summarise_all(calculate_mean_without_na) %>% #change to calculate means without NAs
-  mutate(`Site` = "HI Farm") #add back in site name
-HIFarmBot
+HIFarmBot<-HIFarm %>%
+  group_by(Date) %>% #grouping by date so that it will then calculate the 2m for each date
+  filter(Depth>= (max(Depth)-2)) %>% #find the max depth at each site and subtract 2 to get the data for bottom 2m at each date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means of all variables without NAs
+  mutate(`Site` = "HI Farm")%>% #add back in site name
+  ungroup()
+head(HIFarmBot)
 
+HIDistBot<-HIDist %>%
+  group_by(Date) %>% #grouping by date so that it will then calculate the 2m for each date
+  filter(Depth>= (max(Depth)-2)) %>% #find the max depth at each site and subtract 2 to get the data for bottom 2m at each date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means of all variables without NAs
+  mutate(`Site` = "HI Distant")%>% #add back in site name
+  ungroup()
+head(HIDistBot)
+
+STDistBot<- STDist |>  #data youre feeding it
+  group_by(Date) %>% #grouping by date so that it will then calculate the 2m for each date
+  filter(Depth>= (max(Depth)-2)) %>% #find the max depth at each site and subtract 2 to get the data for bottom 2m at each date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means of all variables without NAs
+  mutate(`Site` = "ST Distant")%>% #add back in site name
+  ungroup()
+head(STDistBot)
+
+STFarmBot<- STFarm |>  #data youre feeding it
+  group_by(Date) %>% #grouping by date so that it will then calculate the 2m for each date
+  filter(Depth>= (max(Depth)-2)) %>% #find the max depth at each site and subtract 2 to get the data for bottom 2m at each date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means of all variables without NAs
+  mutate(`Site` = "ST Farm")%>% #add back in site name
+  ungroup()
+head(STFarmBot)
+
+NHDistBot<- NHDist |>  #data youre feeding it
+  group_by(Date) %>% #grouping by date so that it will then calculate the 2m for each date
+  filter(Depth>= (max(Depth)-2)) %>% #find the max depth at each site and subtract 2 to get the data for bottom 2m at each date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means of all variables without NAs
+  mutate(`Site` = "NH Distant")%>% #add back in site name
+  ungroup()
+head(NHDistBot)
+
+NHFarmBot<- NHFarm |>  #data youre feeding it
+  group_by(Date) %>% #grouping by date so that it will then calculate the 2m for each date
+  filter(Depth>= (max(Depth)-2)) %>% #find the max depth at each site and subtract 2 to get the data for bottom 2m at each date
+  summarise_all(calculate_mean_without_na) %>% #change to calculate means of all variables without NAs
+  mutate(`Site` = "NH Farm")%>% #add back in site name
+  ungroup()
+head(NHFarmBot)
+
+# Combine the dataframes into one large dataframe of bottom 2m means
+BotMeansAQ <- bind_rows(HIFarmBot, HIDistBot, NHFarmBot, NHDistBot, STFarmBot, STDistBot)
+head(BotMeansAQ) #Full list of all means of variables measured at each site at each date
+
+
+###EXPORT new dataframe with bottom means to excel###
+install.packages("writexl")
+library(writexl)
+write_xlsx(BotMeansAQ, "/Users/phoebejekielek/Documents/GitHub/scallop_gsi/Sonde_Bottom_Means_AQ.csv")
+
+
+
+library(ggplot2)
 ##Plot variable mean values by site
-ggplot(combined_mean_data, aes(x=Date, y = Temp °C))+
+ggplot(BotMeansAQ, aes(x=Date, y = "Temp °C"))+
   geom_line()+
   labs(x = "Date", y = "Mean Value", title = "Mean pH Over Time")
 
+###MAKE SOME FIGURES WITH NET-LEVEL DATA###
+boxplot(Depth~Site,data=BotMeansAQ,
+        main = "Average Depth at Each Site", 
+        xlab = "Site", 
+        ylab = "Average Depth (m)",
+        col = c("lightblue", "lightgreen", "lightyellow"), # Set colors for the boxes
+        border = "black",  # Set color for the border lines
+        notch = FALSE#,      # Add notches to the boxplot
+        #notchwidth = 0.5# Set width of the notches
+)
+names(BotMeansAQ)
+
+boxplot(pH~Site,data=BotMeansAQ,
+        main = "Average pH at Each Site", 
+        xlab = "Site", 
+        ylab = "Average pH",
+        #col = c("lightblue", "lightgreen", "lightyellow"), # Set colors for the boxes
+        border = "black",  # Set color for the border lines
+        notch = FALSE#,      # Add notches to the boxplot
+        #notchwidth = 0.5# Set width of the notches
+)
+
+
+
+# Dot plot with colors
+ppl<-ggplot(data=BotMeansAQ, aes(x = Site, y = Salinity, color = Site)) +
+  geom_point(alpha=0.2) +
+  theme_classic()+
+  labs(x = "Time", y = "Mean Salinity at Depth", title = "Time Series of Mean Salinity from Different Sites") +
+  scale_color_discrete(name = "Site")+# Customize legend title
+  ylim(30,35)
+ppl
 
 
 
 
 
-##To find the maximum depth at each site to then determine how to select for just the bottom two meters
-BenthicDepth <- PheobeData |>  #data youre feeding it
-  group_by(Date) |> #group by date
-  summarise(max(Depth)) #return max depth of each days visit
 
 
 
 
 
-
-
-
-
-
-
-
-
-August <- PheobeData |> filter(Date == "8/25/2020") ##subsetting by day
-
-NetDepth <- August |> filter(Depth >= 4 & Depth <= 6) ##choosing depth
-MeanNetDepth <- NetDepth |> dplyr::select(-Date, -"Site Name") |> summarise_all(mean)
-
-MeanNetDepth <- MeanNetDepth |> mutate(Site = "Index") |> mutate(Date = "8/25/2020") |> relocate(c(Date, Site))
-
-
-
-
-ALL_MeanNetDepth <- MeanNetDepth # only did this once at the beginning
-
-############
-
-##If I wanted to just select out a certain month, this chunk can be copied/pasted and change the date and month
-Sept <- PheobeData |> filter(Date == "9/24/2020") ##subsetting by day
-NetDepth <- Sept |> filter(Depth >= 4 & Depth <= 6) ##choosing depth
-MeanNetDepth <- NetDepth |> dplyr::select(-Date, -"Site Name") |> summarise_all(mean) #remove date/site to avoid warnings, summarize all values
-MeanNetDepth <- MeanNetDepth |> mutate(Site = "Index") |> mutate(Date = "9/24/2020") |> relocate(c(Date, Site)) #add back in date and site, move to beginning
-
-
-ALL_MeanNetDepth <- rbind(ALL_MeanNetDepth, MeanNetDepth) # adding new row to the dataframe with all info
-
-
-AugSept <- PheobeData |> filter(Date == "9/24/2020" | Date == "8/25/2020" | Date == "10/28/2020") ##subsetting by day
 
 
 
