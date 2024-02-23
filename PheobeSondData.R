@@ -22,6 +22,7 @@ names(HIFarm)
 
 #Load HIDistant Data
 HIDistData<- read_csv("HIDistant_Sonde.csv")
+##HIDistData is only Hurricane FAR, HIDist has both FAR and DISTANT...why??
 HIDist<- HIDistData %>% #use package dplyr to rename
   rename("Salinity"="Sal psu") %>%
   rename("Chl5"="Chlorophyll RFU...5")%>%
